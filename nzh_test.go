@@ -34,9 +34,25 @@ func TestExtremeIntegerLower(t *testing.T) {
 	}
 }
 
+func TestNegativeIntegerLower(t *testing.T) {
+	want := "负八千九百七十六"
+	got := EncodeString("-8976", false, false)
+	if got != want {
+		t.Fatalf("want %s, got %s", want, got)
+	}
+}
+
 func TestSmallDecimalLower(t *testing.T) {
-	want := "一千三百五十六点五四六八"
-	got := EncodeString("1356.5468", false, false)
+	want := "三点一四一五九二六"
+	got := EncodeString("3.1415926", false, false)
+	if got != want {
+		t.Fatalf("want %s, got %s", want, got)
+	}
+}
+
+func TestNegativeDecimalLower(t *testing.T) {
+	want := "负四百六十七万一千三百五十六点五四八"
+	got := EncodeString("-4671356.548", false, false)
 	if got != want {
 		t.Fatalf("want %s, got %s", want, got)
 	}
