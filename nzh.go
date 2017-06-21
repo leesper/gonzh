@@ -97,6 +97,10 @@ func parseNumber(num string) map[string]string {
 }
 
 func convert(parts map[string]string) interface{} {
+	if len(parts) == 0 {
+		return nil
+	}
+
 	e, ok := parts["exp"]
 	if ok {
 		exp, _ := strconv.Atoi(e)
@@ -166,6 +170,7 @@ func encodeSciNotation(n sciNotation, asMoney, isCapital bool) string {
 func encodeNumber(n number, asMoney, isCapital bool) string {
 	num := numLower
 	si := siLower
+
 	if isCapital {
 		num = numCapital
 		si = siCapital
@@ -180,10 +185,31 @@ func encodeNumber(n number, asMoney, isCapital bool) string {
 		integer = "零"
 	}
 	decimal := encodeDecimal(n.decimal, num)
+	var point string
 	if asMoney {
-
+		integer, decimal = treatAsMoney(integer, decimal, isCapital)
+	} else if len(decimal) != 0 {
+		point = "点"
 	}
-	return sign + integer + decimal
+	return sign + integer + point + decimal
+}
+
+func treatAsMoney(integer, decimal string, capital bool) (string, string) {
+	unit := map[bool]string{
+		false: "元",
+		true:  "圆",
+	}
+	integer += unit[capital]
+	if utf8.RuneCountInString(decimal) == 0 {
+		integer += "整"
+	} else {
+		if utf8.RuneCountInString(decimal) > 1 {
+			decimal = string([]rune(decimal)[0]) + "角" + string([]rune(decimal)[1]) + "分"
+		} else {
+			decimal = string([]rune(decimal)[0]) + "角"
+		}
+	}
+	return integer, decimal
 }
 
 func encodeInteger(num string, numMap map[string]string, si []string, index int) string {
@@ -245,7 +271,7 @@ func encodeDecimal(decimal string, numMap map[string]string) string {
 		return decimal
 	}
 	decimal = strings.TrimRight(decimal, "0")
-	result := "点"
+	var result string
 	for i := range decimal {
 		result += numMap[string(decimal[i])]
 	}
