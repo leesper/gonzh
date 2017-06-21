@@ -106,6 +106,14 @@ func TestDecimalMoneyCapital(t *testing.T) {
 	}
 }
 
+func TestDecimalMoneyLower2(t *testing.T) {
+	want := "一十五万元一角六分"
+	got := EncodeString("150000.16", true, false)
+	if got != want {
+		t.Fatalf("want %s, got %s", want, got)
+	}
+}
+
 func TestNegativeDecimalLower(t *testing.T) {
 	want := "负四百六十七万一千三百五十六点五四八"
 	got := EncodeString("-4671356.548", false, false)

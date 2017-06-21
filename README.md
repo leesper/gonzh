@@ -1,6 +1,9 @@
 gonzh --- 阿拉伯数字转中文，支持金额和大小写 v1.0
 ========================
 
+https://travis-ci.org/leesper/gonzh.svg?branch=master
+[![Build Status](https://travis-ci.org/leesper/gonzh.svg?branch=master)](https://travis-ci.org/leesper/gonzh)
+
 Inspired by [nzh](https://github.com/cnwhy/nzh)
 
 ## Features
@@ -27,6 +30,9 @@ fmt.Println(gonzh.EncodeString("3.1415926", true, true))
 
 // 壹仟叁佰伍拾陆圆整
 fmt.Println(gonzh.EncodeString("1356", true, true))
+
+// 一十五万元一角六分
+fmt.Println(gonzh.EncodeString("150000.16", true, false))
 ```
 
 ## 3. 负数和小数转换
