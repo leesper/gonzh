@@ -1,7 +1,6 @@
 gonzh --- 阿拉伯数字转中文，支持金额和大小写 v1.0
 ========================
 
-https://travis-ci.org/leesper/gonzh.svg?branch=master
 [![Build Status](https://travis-ci.org/leesper/gonzh.svg?branch=master)](https://travis-ci.org/leesper/gonzh)
 
 Inspired by [nzh](https://github.com/cnwhy/nzh)
