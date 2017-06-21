@@ -26,6 +26,14 @@ func TestBigIntegerLower(t *testing.T) {
 	}
 }
 
+func TestBigIntegerCapital(t *testing.T) {
+	want := "伍仟肆佰叁拾贰万壹仟玖佰伍拾捌"
+	got := EncodeString("54321958", false, true)
+	if got != want {
+		t.Fatalf("want %s, got %s", want, got)
+	}
+}
+
 func TestBigMoneyCapital(t *testing.T) {
 	want := "伍仟肆佰叁拾贰万壹仟玖佰伍拾捌圆整"
 	got := EncodeString("54321958", true, true)
