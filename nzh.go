@@ -1,16 +1,18 @@
 package gonzh
 
 import (
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 var (
 	// regular expression for scientific notification
-	sciRegEx = regexp.MustCompile(`^(?P<sign>[+-])?0*(?P<integer>\d+)(?P<decimal>\.(\d+))?e((?P<esign>[+-])?(?P<exp>\d+))$`)
+	sciRegEx = regexp.MustCompile(`^(?P<sign>[+-])?0*(?P<integer>\d+)(\.(?P<decimal>\d+))?e((?P<esign>[+-])?(?P<exp>\d+))$`)
 	// regular expression for ordinary number
-	numRegEx   = regexp.MustCompile(`^(?P<sign>[+-])?0*(?P<integer>\d+)(?P<decimal>\.(\d+))?$`)
+	numRegEx   = regexp.MustCompile(`^(?P<sign>[+-])?0*(?P<integer>\d+)(\.(?P<decimal>\d+))?$`)
 	numCapital = map[string]string{
 		"0": "零",
 		"1": "壹",
@@ -103,7 +105,7 @@ func convert(parts map[string]string) interface{} {
 			minus:   parts["sign"] == "-",
 			eminus:  parts["esign"] == "-",
 			integer: parts["integer"],
-			decimal: parts["decimal"],
+			decimal: strings.TrimRight(parts["decimal"], "0"),
 			exp:     exp,
 		}
 	}
@@ -117,10 +119,6 @@ func convert(parts map[string]string) interface{} {
 
 func encodeSciNotation(n sciNotation, asMoney, isCapital bool) string {
 	var result number
-	decimal := n.decimal
-	if decimal != "" {
-		decimal = decimal[1:]
-	}
 	if n.eminus {
 		diff := n.exp - len(n.integer)
 		if diff >= 0 {
@@ -131,27 +129,26 @@ func encodeSciNotation(n sciNotation, asMoney, isCapital bool) string {
 			result = number{
 				minus:   n.minus,
 				integer: "0",
-				decimal: "." + zeros + n.integer + decimal,
+				decimal: zeros + n.integer + n.decimal,
 			}
+			fmt.Println("Result", result)
 		} else {
 			result = number{
 				minus:   n.minus,
 				integer: n.integer[:-diff],
-				decimal: "." + n.integer[-diff:] + decimal,
+				decimal: n.integer[-diff:] + n.decimal,
 			}
 		}
 	} else {
-		diff := n.exp - len(decimal)
+		diff := n.exp - len(n.decimal)
 		if diff >= 0 {
 			var zeros string
 			for i := 0; i < diff; i++ {
 				zeros += "0"
 			}
-			var integer string
-			for _, i := range n.integer {
-				if string(i) != "0" {
-					integer += string(i)
-				}
+			integer := n.integer
+			for _, i := range n.decimal {
+				integer += string(i)
 			}
 			result = number{
 				minus:   n.minus,
@@ -160,8 +157,8 @@ func encodeSciNotation(n sciNotation, asMoney, isCapital bool) string {
 		} else {
 			result = number{
 				minus:   n.minus,
-				integer: n.integer + decimal[:n.exp],
-				decimal: "." + decimal[n.exp:],
+				integer: n.integer + n.decimal[:n.exp],
+				decimal: n.decimal[n.exp:],
 			}
 		}
 	}
@@ -181,6 +178,9 @@ func encodeNumber(n number, asMoney, isCapital bool) string {
 		sign = "负"
 	}
 	integer := encodeInteger(n.integer, num, si, 3)
+	if integer == "" {
+		integer = "零"
+	}
 	decimal := encodeDecimal(n.decimal, num)
 	// TODO asMoney
 	return sign + integer + decimal
@@ -192,23 +192,60 @@ func encodeInteger(num string, numMap map[string]string, si []string, index int)
 		for i := range num {
 			result += (numMap[string(num[i])] + si[len(num)-1-i])
 		}
+		result = dealWithIntegerZeros(result)
 		if index >= 4 {
 			result = strings.Replace(result, "个", si[index], -1)
-		} else {
-			result = strings.Replace(result, "个", "", -1)
 		}
-		return result
+		if utf8.RuneCountInString(result) == 2 && string([]rune(result)[0]) == "零" {
+			result = ""
+		}
+		return strings.Replace(result, "个", "", -1)
 	}
 	return encodeInteger(num[:len(num)-4], numMap, si, index+1) + encodeInteger(num[len(num)-4:], numMap, si, index)
+}
+
+func dealWithIntegerZeros(chn string) string {
+	chn = strings.Replace(chn, "零个", "个", -1)
+	chn = strings.Replace(chn, "零十", "零", -1)
+	chn = strings.Replace(chn, "零百", "零", -1)
+	chn = strings.Replace(chn, "零千", "零", -1)
+	chn = strings.Replace(chn, "零万", "零", -1)
+	chn = strings.Replace(chn, "零亿", "零", -1)
+	chn = strings.Replace(chn, "零兆", "零", -1)
+	chn = strings.Replace(chn, "零京", "零", -1)
+	chn = strings.Replace(chn, "零垓", "零", -1)
+	chn = strings.Replace(chn, "零秭", "零", -1)
+	chn = strings.Replace(chn, "零穰", "零", -1)
+	chn = strings.Replace(chn, "零沟", "零", -1)
+	chn = strings.Replace(chn, "零涧", "零", -1)
+	chn = strings.Replace(chn, "零正", "零", -1)
+	chn = strings.Replace(chn, "零载", "零", -1)
+	var (
+		filtered string
+		found    bool
+	)
+	for _, c := range chn {
+		if string(c) == "零" {
+			if found {
+				continue
+			} else {
+				found = true
+				filtered += string(c)
+			}
+		} else {
+			found = false
+			filtered += string(c)
+		}
+	}
+	return filtered
 }
 
 func encodeDecimal(decimal string, numMap map[string]string) string {
 	if decimal == "" {
 		return decimal
 	}
-
+	decimal = strings.TrimRight(decimal, "0")
 	result := "点"
-	decimal = decimal[1:]
 	for i := range decimal {
 		result += numMap[string(decimal[i])]
 	}

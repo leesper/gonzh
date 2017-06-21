@@ -34,6 +34,14 @@ func TestExtremeIntegerLower(t *testing.T) {
 	}
 }
 
+func TestExtremeIntegerZeros(t *testing.T) {
+	want := "九十兆"
+	got := EncodeString("90000000000000", false, false)
+	if got != want {
+		t.Fatalf("want %s, got %s", want, got)
+	}
+}
+
 func TestNegativeIntegerLower(t *testing.T) {
 	want := "负八千九百七十六"
 	got := EncodeString("-8976", false, false)
@@ -53,6 +61,62 @@ func TestSmallDecimalLower(t *testing.T) {
 func TestNegativeDecimalLower(t *testing.T) {
 	want := "负四百六十七万一千三百五十六点五四八"
 	got := EncodeString("-4671356.548", false, false)
+	if got != want {
+		t.Fatalf("want %s, got %s", want, got)
+	}
+}
+
+func TestNumberWithZeros(t *testing.T) {
+	want := "负四百六十万零三百五十六点五四八"
+	got := EncodeString("-4600356.548", false, false)
+	if got != want {
+		t.Fatalf("want %s, got %s", want, got)
+	}
+}
+
+func TestNumberZeroTail(t *testing.T) {
+	want := "负五百六十"
+	got := EncodeString("-560", false, false)
+	if got != want {
+		t.Fatalf("want %s, got %s", want, got)
+	}
+}
+
+func TestNumberMultipleZeros(t *testing.T) {
+	want := "五十万零三百零六点零四"
+	got := EncodeString("500306.04", false, false)
+	if got != want {
+		t.Fatalf("want %s, got %s", want, got)
+	}
+}
+
+func TestNumberInterleavedZeros(t *testing.T) {
+	want := "九千零八十万七千零六十点一零二零三"
+	got := EncodeString("090807060.102030", false, false)
+	if got != want {
+		t.Fatalf("want %s, got %s", want, got)
+	}
+}
+
+func TestSciNotationPositive(t *testing.T) {
+	want := "一十二垓三千四百五十六京七千八百九十兆"
+	got := EncodeString("1.23456789e+21", false, false)
+	if got != want {
+		t.Fatalf("want %s, got %s", want, got)
+	}
+}
+
+func TestSciNotationNegative(t *testing.T) {
+	want := "零点零零零零零零零零零三一四一五九二六"
+	got := EncodeString("3.1415926e-10", false, false)
+	if got != want {
+		t.Fatalf("want %s, got %s", want, got)
+	}
+}
+
+func TestSciNotationYetAnother(t *testing.T) {
+	want := "一千零三十四点五六"
+	got := EncodeString("1.03456e3", false, false)
 	if got != want {
 		t.Fatalf("want %s, got %s", want, got)
 	}
