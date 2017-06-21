@@ -1,7 +1,6 @@
 package gonzh
 
 import (
-	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -131,7 +130,6 @@ func encodeSciNotation(n sciNotation, asMoney, isCapital bool) string {
 				integer: "0",
 				decimal: zeros + n.integer + n.decimal,
 			}
-			fmt.Println("Result", result)
 		} else {
 			result = number{
 				minus:   n.minus,
@@ -182,7 +180,9 @@ func encodeNumber(n number, asMoney, isCapital bool) string {
 		integer = "零"
 	}
 	decimal := encodeDecimal(n.decimal, num)
-	// TODO asMoney
+	if asMoney {
+
+	}
 	return sign + integer + decimal
 }
 

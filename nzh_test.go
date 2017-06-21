@@ -114,9 +114,17 @@ func TestSciNotationNegative(t *testing.T) {
 	}
 }
 
-func TestSciNotationYetAnother(t *testing.T) {
+func TestSciNotation3(t *testing.T) {
 	want := "一千零三十四点五六"
 	got := EncodeString("1.03456e3", false, false)
+	if got != want {
+		t.Fatalf("want %s, got %s", want, got)
+	}
+}
+
+func TestSciNotation4(t *testing.T) {
+	want := "一十二点三四五"
+	got := EncodeString("1234.5e-2", false, false)
 	if got != want {
 		t.Fatalf("want %s, got %s", want, got)
 	}
